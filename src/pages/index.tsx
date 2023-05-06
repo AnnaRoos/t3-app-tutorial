@@ -8,6 +8,8 @@ import { type RouterOutputs, api } from "~/utils/api";
 import Image from "next/image";
 import { LoadingPage } from "~/components/Loading/LoadingPage";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
+import { LoadingSpinner } from "~/components/Loading/LoadingSpinner";
 
 dayjs.extend(relativeTime);
 
@@ -64,6 +66,14 @@ const Home: NextPage = () => {
       setInput("");
       await ctx.posts.getAll.invalidate();
     },
+    onError: (err) => {
+      const errorMessage = err.data?.zodError?.fieldErrors?.content;
+      if (!!errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post");
+      }
+    },
   });
 
   if (!userLoaded) return <div />;
@@ -95,8 +105,21 @@ const Home: NextPage = () => {
                   className="w-full rounded-lg bg-transparent py-2 outline-none placeholder:text-pink-200"
                   onChange={(e) => setInput(e.target.value)}
                   disabled={isPosting}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (input !== "" && !isPosting) {
+                        mutate({ content: input });
+                      }
+                    }
+                  }}
                 />
-                <button onClick={() => mutate({ content: input })}>Post</button>
+                {input !== "" && !isPosting && (
+                  <button onClick={() => mutate({ content: input })}>
+                    Post
+                  </button>
+                )}
+                {isPosting && <LoadingSpinner size={20} />}
               </div>
             )}
           </div>
