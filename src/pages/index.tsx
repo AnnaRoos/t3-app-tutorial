@@ -6,6 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { type RouterOutputs, api } from "~/utils/api";
 import Image from "next/image";
+import { LoadingPage } from "~/components/Loading/LoadingPage";
 
 dayjs.extend(relativeTime);
 
@@ -36,11 +37,12 @@ const PostView = (props: PostWithAuthor) => {
 };
 
 const Home: NextPage = () => {
-  const { data, isLoading } = api.posts.getAll.useQuery();
-  const user = useUser();
-  console.log(user);
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (!userLoaded) return <div />;
+
+  if (postsLoading) return <LoadingPage />;
 
   if (!data) return <div>Failed to load posts</div>;
 
@@ -54,8 +56,8 @@ const Home: NextPage = () => {
       <main className="flex h-screen flex-col items-center">
         <div className="flex h-full w-full flex-col border-x-2 border-pink-400 md:max-w-2xl">
           <div className="flex w-full border-b border-pink-400 p-4">
-            {!user.isSignedIn && <SignInButton />}
-            {!!user.isSignedIn && (
+            {!isSignedIn && <SignInButton />}
+            {!!isSignedIn && (
               <div className="flex w-full items-center gap-4 ">
                 <UserButton
                   appearance={{
