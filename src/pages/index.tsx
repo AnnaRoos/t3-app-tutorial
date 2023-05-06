@@ -7,6 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { type RouterOutputs, api } from "~/utils/api";
 import Image from "next/image";
 import { LoadingPage } from "~/components/Loading/LoadingPage";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -30,26 +31,47 @@ const PostView = (props: PostWithAuthor) => {
             post.createdAt
           ).fromNow()}`}</span>
         </p>
-        <p>{post.content}</p>
+        <p className="text-2xl">{post.content}</p>
       </div>
     </div>
   );
 };
 
-const Home: NextPage = () => {
+const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
-
-  if (!userLoaded) return <div />;
 
   if (postsLoading) return <LoadingPage />;
-
   if (!data) return <div>Failed to load posts</div>;
 
   return (
     <>
+      {data.map(({ post, author }) => (
+        <PostView key={post.id} post={post} author={author} />
+      ))}
+    </>
+  );
+};
+
+const Home: NextPage = () => {
+  const [input, setInput] = useState("");
+  api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: async () => {
+      setInput("");
+      await ctx.posts.getAll.invalidate();
+    },
+  });
+
+  if (!userLoaded) return <div />;
+
+  return (
+    <>
       <Head>
-        <title>Create T3 App</title>
+        <title>T3 app tutorial</title>
         <meta name="description" content="T3 app tutorial" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -67,16 +89,18 @@ const Home: NextPage = () => {
                   }}
                 />
                 <input
+                  value={input}
                   type="text"
                   placeholder="Type some emojis"
-                  className="w-full rounded-lg bg-transparent py-2 outline-none"
+                  className="w-full rounded-lg bg-transparent py-2 outline-none placeholder:text-pink-200"
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={isPosting}
                 />
+                <button onClick={() => mutate({ content: input })}>Post</button>
               </div>
             )}
           </div>
-          {data.map(({ post, author }) => (
-            <PostView key={post.id} post={post} author={author} />
-          ))}
+          <Feed />
         </div>
       </main>
     </>
