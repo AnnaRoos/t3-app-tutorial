@@ -1,10 +1,6 @@
 import { type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { prisma } from "~/server/db";
-import { appRouter } from "~/server/api/root";
-import superjson from "superjson";
 import Layout from "./layout";
 import Image from "next/image";
 import { PostView } from "~/components/Posts/PostView";
