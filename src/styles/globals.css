@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-black text-pink-200;
+  @apply overscroll-none bg-black text-teal-200;
 }
