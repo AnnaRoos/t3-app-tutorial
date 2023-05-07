@@ -7,15 +7,16 @@ import { appRouter } from "~/server/api/root";
 import superjson from "superjson";
 import Layout from "./layout";
 import Image from "next/image";
-import { LoadingSpinner } from "~/components/Loading/LoadingSpinner";
 import { PostView } from "~/components/Posts/PostView";
+import { LoadingPage } from "~/components/Loading/LoadingPage";
+import { ssgHelper } from "~/server/helpers/ssgHelper";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { userId } = props;
   const { data, isLoading: postsLoading } = api.posts.getPostsByUserId.useQuery(
     { userId: userId }
   );
-  if (postsLoading) return <LoadingSpinner />;
+  if (postsLoading) return <LoadingPage />;
 
   if (!data || data.length === 0) return <div>User has not posted</div>;
   return (
@@ -59,11 +60,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson, // optional - adds superjson serialization
-  });
+  const ssg = ssgHelper();
   const slug = context.params?.slug;
   if (typeof slug !== "string") {
     throw new Error("slug is not a string");
