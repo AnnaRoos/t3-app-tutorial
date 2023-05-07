@@ -5,8 +5,27 @@ import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { prisma } from "~/server/db";
 import { appRouter } from "~/server/api/root";
 import superjson from "superjson";
-import { Layout } from "./layout";
+import Layout from "./layout";
 import Image from "next/image";
+import { LoadingSpinner } from "~/components/Loading/LoadingSpinner";
+import { PostView } from "~/components/Posts/PostView";
+
+const ProfileFeed = (props: { userId: string }) => {
+  const { userId } = props;
+  const { data, isLoading: postsLoading } = api.posts.getPostsByUserId.useQuery(
+    { userId: userId }
+  );
+  if (postsLoading) return <LoadingSpinner />;
+
+  if (!data || data.length === 0) return <div>User has not posted</div>;
+  return (
+    <>
+      {data.map(({ post, author }) => (
+        <PostView key={post.id} post={post} author={author} />
+      ))}
+    </>
+  );
+};
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   const { data } = api.profile.getUserByUsername.useQuery({
@@ -21,16 +40,19 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         <title>{data.username}</title>
       </Head>
       <Layout>
-        <div className="relative h-36 bg-teal-600">
-          <Image
-            src={data.profileImageUrl}
-            width={128}
-            height={128}
-            alt={`@${data.username}'s profile picture`}
-            className="absolute bottom-0 left-0 -mb-16 ml-4 rounded-full border-4 border-black bg-black"
-          />
+        <div>
+          <div className="relative h-36 bg-teal-600">
+            <Image
+              src={data.profileImageUrl}
+              width={128}
+              height={128}
+              alt={`@${data.username}'s profile picture`}
+              className="absolute bottom-0 left-0 -mb-16 ml-4 rounded-full border-4 border-black bg-black"
+            />
+          </div>
+          <div className="border-b border-teal-400 px-4 pb-4 pt-16 text-2xl font-bold">{`@${data.username}`}</div>
         </div>
-        <div className="border-b border-teal-400 px-4 pb-4 pt-16 text-2xl font-bold">{`@${data.username}`}</div>
+        <ProfileFeed userId={data.id} />
       </Layout>
     </>
   );

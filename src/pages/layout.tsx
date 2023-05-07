@@ -1,6 +1,6 @@
 import React, { type PropsWithChildren } from "react";
 
-export const Layout = (props: PropsWithChildren) => {
+const Layout = (props: PropsWithChildren) => {
   const { children } = props;
   return (
     <main className="flex h-screen flex-col items-center">
@@ -10,3 +10,5 @@ export const Layout = (props: PropsWithChildren) => {
     </main>
   );
 };
+
+export default Layout;

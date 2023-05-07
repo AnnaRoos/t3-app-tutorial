@@ -1,48 +1,12 @@
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
-import { type RouterOutputs, api } from "~/utils/api";
-import Image from "next/image";
+import { api } from "~/utils/api";
 import { LoadingPage } from "~/components/Loading/LoadingPage";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "~/components/Loading/LoadingSpinner";
-import Link from "next/link";
-import { Layout } from "./layout";
-
-dayjs.extend(relativeTime);
-
-type PostWithAuthor = RouterOutputs["posts"]["getAll"][number];
-
-const PostView = (props: PostWithAuthor) => {
-  const { post, author } = props;
-  return (
-    <div className="flex gap-4 border-b border-teal-400 p-4">
-      <Image
-        src={author.profileImageUrl}
-        className="h-14 w-14 rounded-full"
-        alt={`@${author.username}'s profile picture`}
-        width={56}
-        height={56}
-      />
-      <div className="flex flex-col text-teal-400">
-        <p className="flex gap-1">
-          <Link href={`/@${author.username}`}>
-            <span>{`@${author.username}`}</span>
-          </Link>
-          <Link href={`/post/${post.id}`}>
-            <span className="font-thin">{`• ${dayjs(
-              post.createdAt
-            ).fromNow()}`}</span>
-          </Link>
-        </p>
-        <p className="text-2xl">{post.content}</p>
-      </div>
-    </div>
-  );
-};
+import Layout from "./layout";
+import { PostView } from "~/components/Posts/PostView";
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
