@@ -46,9 +46,6 @@ dependencies:
   react-hot-toast:
     specifier: ^2.4.1
     version: 2.4.1(csstype@3.1.2)(react-dom@18.2.0)(react@18.2.0)
-  server:
-    specifier: link:@trpc/react-query/server
-    version: link:@trpc/react-query/server
   superjson:
     specifier: 1.12.2
     version: 1.12.2
